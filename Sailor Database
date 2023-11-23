@@ -1,0 +1,152 @@
+CREATE DATABASE sailor;
+
+use sailor;
+
+CREATE TABLE sailordata (
+ sid INT PRIMARY KEY,
+ sname VARCHAR(30),
+ age INT,
+ rating INT);
+
+ CREATE TABLE boat (
+bid INT PRIMARY KEY,
+bname VARCHAR(20),
+color VARCHAR(10)); 
+
+CREATE TABLE RSERVERS (
+date DATE,
+s_id INT,
+b_id INT, 
+FOREIGN KEY (s_id) references sailordata(sid),
+FOREIGN KEY (b_id) references boat(bid));
+
+INSERT INTO sailordata
+(sid,sname,age,rating)
+VALUES
+(123,"JohnyDepp",22,5),
+(456,"TomCruise",25,5),
+(789,"CilianMurphy",29,5),
+(741,"Leonardo De Caprio",32,5),
+(963,"Jogi Prem",33,4);
+
+
+SELECT * FROM sailordata;
+
+INSERT INTO boat 
+(bid,bname,color)
+VALUES
+(1,"Victoria","Black"),
+(2,"Royal Fortune","White"),
+(3,"HMS Beagle","Brown"),
+(4,"Titanic","Black"),
+(5,"Vikram","Maroon");
+
+
+SELECT * FROM boat;
+
+INSERT INTO RSERVERS
+(s_id,b_id,date)
+VALUES
+(123,1,"2023-01-01"),
+(456,2,"2023-02-01"),
+(789,3,"2023-03-01"),
+(741,4,"2023-04-01"),
+(963,5,"2023-04-05");
+
+SELECT * FROM RSERVERS;
+
+
+SELECT * FROM RSERVERS where date>="1998-03-01";
+
+ALTER TABLE sailordata
+ADD COLUMN salary INT;
+
+UPDATE sailordata
+SET salary=50000
+WHERE salary IS NULL;
+
+UPDATE sailordata
+SET salary=100000
+where salary="50000" ;
+
+UPDATE sailordata
+SET salary=150000
+where salary="100000" and age>=25;
+
+ALTER TABLE boat
+ADD COLUMN model VARCHAR(10);
+
+UPDATE boat
+SET model="1519"
+where model IS NULL and bname="Victoria";
+
+UPDATE boat
+SET model="1719"
+where model IS NULL and bname="Royal Fortune";
+
+
+UPDATE boat
+SET model="1831"
+where model IS NULL and bname="HMS Beagle";
+
+UPDATE boat
+SET model="1912"
+where model IS NULL and bname="Titanic";
+
+UPDATE boat
+SET model="2013"
+where model IS NULL and bname="Vikramditya";
+
+ALTER TABLE RSERVERS
+ADD loc VARCHAR(10);
+
+ALTER TABLE RSERVERS
+DROP loc;
+
+ALTER TABLE boat
+ADD CONSTRAINT CHK_model CHECK (model >= 1600);
+
+DELETE FROM sailordata
+where sid=963;
+
+-- 3)
+SELECT DISTINCT * 
+FROM sailordata 
+WHERE sid IN(
+	SELECT DISTINCT s_id
+    FROM rservers
+    WHERE b_id IN(
+    SELECT DISTINCT bid
+    FROM boat 
+    WHERE color ='Maroon'));
+
+-- 4)
+SELECT sname
+FROM sailordata
+WHERE sid IN (
+	SELECT  DISTINCT sid 
+    FROM rservers);
+    
+-- 5)
+SELECT *
+FROM sailordata
+where rating >4;
+    
+-- 6)
+SELECT AVG(age),rating
+FROM sailordata
+GROUP BY rating;
+
+-- 7)
+SELECT AVG(age),rating
+FROM sailordata
+GROUP BY rating
+HAVING COUNT(*)>2;
+
+-- 8)
+SELECT COUNT(*),bid,bname
+FROM boat
+JOIN rservers
+ON bid=b_id
+WHERE color='Black'
+GROUP BY bid;
