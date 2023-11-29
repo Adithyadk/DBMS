@@ -1,0 +1,277 @@
+CREATE DATABASE driver; 
+
+use driver;
+
+-- Creating Table PERSON
+CREATE TABLE PERSON(
+driver_id VARCHAR(10) PRIMARY KEY ,
+name VARCHAR(30),
+address VARCHAR(50));
+
+-- Creating Table CAR
+CREATE TABLE CAR(
+regno VARCHAR(20) PRIMARY KEY,
+model VARCHAR(15),
+year INT);
+
+
+-- Creating Table Accident
+CREATE TABLE ACCIDENT(
+report_number INT PRIMARY KEY,
+acc_date DATE,
+location VARCHAR(40));
+
+
+-- Creating Table Owns
+CREATE TABLE OWNS(
+d_id VARCHAR(10),
+reg_no VARCHAR(20),
+FOREIGN KEY (d_id) REFERENCES PERSON(driver_id) ON DELETE SET NULL,
+FOREIGN KEY (reg_no) REFERENCES CAR(regno) ON DELETE SET NULL
+ );
+ 
+ 
+ -- Creating Table Participated
+CREATE TABLE PARTICIPATED(
+D_ID VARCHAR(10),
+REG_NO VARCHAR(20),
+Report_no INT,
+damage_amount INT,
+FOREIGN KEY (D_ID) REFERENCES PERSON(driver_id) ON DELETE SET NULL,
+FOREIGN KEY (REG_NO) REFERENCES CAR(regno) ON DELETE SET NULL,
+FOREIGN KEY (Report_no) REFERENCES ACCIDENT(report_number) ON DELETE SET NULL
+);
+
+
+-- Insering Into Person Table
+INSERT INTO PERSON
+(driver_id,name,address)
+VALUES
+("341","Anirudh","Chennai"),
+("342","LeoDas","Jammu"),
+("343","Rolex","Mumbai"),
+("344","Joseph Vijay","Chennai"),
+("345","Anthony Das","Goa");
+
+
+SELECT * FROM PERSON;
+
+
+-- Inserting Into Car
+INSERT INTO CAR
+(regno,model,year)
+VALUES
+("TN-38-AR-9898","Macan SUV","2023"),
+("JK-02-LD-8055","GWagon","2022"),
+("MH-01-RX-5508","Fortuner","2019"),
+("TN-38-JV-0007","RollsRoyceGhost","2021"),
+("GA-08-AD-0101","BMW X7","2023");
+
+
+
+SELECT * FROM CAR;
+
+-- Inserting into Accident;
+INSERT INTO ACCIDENT
+(report_number,acc_date,location)
+VALUES
+(184,"2023-09-08","Banglore"),
+(233,"2022-12-31","Himachal Pradesh"),
+(245,"2021-11-30","Goa"),
+(327,"2022-10-29","Madurai"),
+(456,"2023-02-14","Burdez");
+
+
+-- Insering Into Owns
+INSERT INTO OWNS
+(d_id,reg_no)
+VALUES
+("341","TN-38-AR-9898"),
+("342","JK-02-LD-8055"),
+("343","MH-01-RX-5508"),
+("344","TN-38-JV-0007"),
+("345","GA-08-AD-0101");
+
+
+
+SELECT * FROM OWNS;
+
+
+-- Insert into Participated
+INSERT INTO PARTICIPATED
+(D_ID,REG_NO,Report_no,damage_amount)
+VALUES
+("341","TN-38-AR-9898",184,200000),
+("342","JK-02-LD-8055",233,350000),
+("343","MH-01-RX-5508",245,150000),
+("344","TN-38-JV-0007",327,500000),
+("345","GA-08-AD-0101",456,375000);
+
+
+SELECT * FROM PARTICIPATED;
+
+-- Altering Table Person and adding column age and check constraint.
+ALTER TABLE PERSON
+ADD COLUMN age INT 
+CONSTRAINT age_check CHECK(age>=20);
+
+-- Inserting age into table
+UPDATE PERSON
+SET age=18
+WHERE age IS NULL and driver_id="341";
+
+UPDATE PERSON
+SET age=35
+WHERE age IS NULL and driver_id="342";
+
+UPDATE PERSON
+SET age=30
+WHERE age IS NULL and driver_id="343";
+
+UPDATE PERSON
+SET age=45
+WHERE age IS NULL and driver_id="344";
+
+UPDATE PERSON
+SET age=50
+WHERE age IS NULL and driver_id="345";
+
+-- Adding column brand and color in car table
+ALTER TABLE CAR
+ADD COLUMN color VARCHAR(15);
+
+ALTER TABLE CAR
+ADD COLUMN brand VARCHAR(20);
+
+-- Updating values of car brand color
+UPDATE CAR
+SET COLOR="DarkPurple"
+WHERE color IS NULL and model="Macan SUV";
+
+UPDATE CAR 
+SET brand="Porsche"
+WHERE brand IS NULL; -- Update this in and above in (1 condition) only like below cases
+
+UPDATE CAR
+SET COLOR="black",brand="Mercedez Benz"
+WHERE color IS NULL and model="GWagon";
+
+UPDATE CAR
+SET color="white",brand="Toyota"
+WHERE color IS NULL and model="Fortuner";
+
+UPDATE CAR
+SET color="white",brand="RollsRoyce"
+WHERE color IS NULL and model="RollsRoyceGhost";
+
+UPDATE CAR
+SET COLOR="grey",brand="BMW"
+WHERE color IS NULL and model="BMW X7";
+
+
+-- Adding Percent damage column in accident table
+ALTER TABLE ACCIDENT
+ADD COLUMN PERCENT_DAMAGE INT;
+
+-- Updating Percent Damage
+UPDATE ACCIDENT
+SET PERCENT_DAMAGE=25
+WHERE PERCENT_DAMAGE IS NULL and report_number=184;
+
+UPDATE ACCIDENT
+SET PERCENT_DAMAGE=35
+WHERE PERCENT_DAMAGE IS NULL and report_number=233;
+
+SELECT * FROM ACCIDENT;
+
+-- Dropping Percent Damage
+ALTER TABLE ACCIDENT
+DROP PERCENT_DAMAGE;
+
+
+-- Updating Model of a car in car table.
+UPDATE CAR
+SET model="x7"
+WHERE model="BMW X7";
+
+UPDATE CAR
+SET model="Ghost"
+WHERE model="RollsRoyceGhost";
+
+-- Deleting in Owns a particular D_id
+DELETE FROM OWNS
+WHERE d_id="341";
+
+-- -------------------------------------------------------------------------------------------
+-- Queries 
+
+-- 1> Find the total number of people who owned cars that were involved in accident in 2023
+ SELECT COUNT(*) AS 'Accident Count Of 2023'
+ FROM accident
+ WHERE acc_date LIKE '2023%';
+
+-- 2> Find the number of Accidents in which the cars belonging to person having "Das" as last name were involved
+SELECT COUNT(*) AS 'No. of Accidents '
+FROM participated 
+WHERE D_ID IN(
+	SELECT driver_id 
+    FROM person
+    WHERE name LIKE '%Das');
+    
+-- 3> Find the driver having name ending with "das" and car in 'JK'
+SELECT * 
+FROM person 
+WHERE name like "%DAS" AND driver_id IN(
+	SELECT d_id
+    FROM owns 
+    WHERE reg_no LIKE 'JK%');
+    
+-- 4>Names of people involved in accident except banglore
+SELECT DISTINCT name
+FROM person 
+WHERE driver_id IN(
+	SELECT D_ID 
+    FROM participated 
+    WHERE Report_no IN (
+		SELECT report_number
+        FROM accident
+        WHERE location != 'Banglore'));
+
+
+-- 5>List of cars owned by people in descending order of driver name    
+SELECT P.name,C.model,C.brand
+FROM person AS P, car AS C,owns AS O
+WHERE P.driver_id=O.d_id AND O.reg_no=C.regno
+ORDER BY P.name DESC;
+
+-- 6> list the people involved in accident according to damage amount in descending order
+SELECT P.name,PAR.damage_amount
+FROM person AS P, participated AS PAR
+WHERE P.driver_id=PAR.D_ID
+ORDER BY damage_amount DESC;
+
+-- 7>Combine names of driver and location of Accident
+SELECT P.name,A.location
+FROM person AS P, accident AS A,participated AS PAR
+WHERE P.driver_id=PAR.D_ID AND PAR.Report_no=A.report_number;
+
+-- 8>List of Cars participated in accidents 
+SELECT C.model,C.brand,C.regno
+FROM car AS C,participated AS PAR
+WHERE C.regno=PAR.REG_NO;
+
+
+-- 9>Names of Drivers involved in an Accident
+SELECT DISTINCT P.name
+FROM person AS P
+WHERE P.driver_id IN (
+	SELECT D_ID 
+    FROM participated);
+    
+-- 10>Average damage amount in each year
+SELECT AVG(damage_amount),YEAR(acc_date)
+FROM participated AS P, accident AS A
+WHERE P.Report_no=A.report_number
+GROUP BY YEAR(acc_date);
+
+-- --------------------------------------- 
