@@ -267,7 +267,7 @@ WHERE I.item_id=OI.itm_id
 ORDER BY OI.quantity DESC;
 
 -- 10> List the item and its source and destination addresses
-SELECT I.item_name,W.city,C.city
+SELECT DISTINCT I.item_name,W.city,C.city
 FROM customer AS C,warehouse AS W, item AS I,order_item AS OI
 WHERE C.customer_id IN(
 	SELECT cust_id
@@ -275,4 +275,4 @@ WHERE C.customer_id IN(
     WHERE order_id IN (
 		SELECT ord_id
         FROM shipment
-        WHERE whouse_id=W.warehouse_id));
+        WHERE whouse_id=W.warehouse_id) AND order_id IN(SELECT o_id FROM order_item WHERE itm_id=item_id));
