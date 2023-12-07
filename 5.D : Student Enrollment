@@ -206,10 +206,67 @@ UPDATE course
 SET courseId=550
 WHERE courseId=553;
 
-UPDATE student
-SET regno='NULL'
-WHERE regno='01JCE21CS001';
 
-UPDATE course
-SET courseId=0
-WHERE courseId=550;
+-- Queries
+
+-- 1>Produce a list of textbooks in alphabetic order for the courses offered by CS department 
+SELECT * 
+FROM text AS T
+JOIN bookadoption  AS BT USING(bookISBN)
+JOIN course AS C USING (courseId)
+WHERE C.dept ='CSE';
+
+-- 2>Student with maximum marks in each subject //not complete to be updated
+SELECT C.cname,MAX(E.marks)
+FROM student AS S
+JOIN enroll AS E USING (regno)
+JOIN  course AS C USING (courseId)
+GROUP BY C.cname;
+
+
+-- 3>Number of students in each course
+SELECT cname,COUNT(*)
+FROM course
+JOIN enroll USING(courseId)
+GROUP BY cname;
+
+
+-- 4>Avereage marks scored by students in each subject 
+SELECT C.cname,AVG(E.marks)
+FROM student AS S
+JOIN enroll AS E USING (regno)
+JOIN  course AS C USING (courseId)
+GROUP BY C.cname;
+
+
+-- 5>Select details of all students born in 2003
+SELECT * 
+FROM student
+WHERE bdate LIKE '%2003%';
+
+-- 6>Select courses with course ID between 510 and 550
+SELECT * 
+FROM course
+WHERE courseId BETWEEN 510 AND 550;
+
+-- 7>List the total number of books by each publisher
+SELECT publisher,COUNT(*)
+FROM text
+GROUP BY publisher
+ORDER BY publisher;
+
+-- 8>List all the authors who write books for CSE students along with the book title
+SELECT bookTitle,Author
+FROM text 
+JOIN bookadoption USING(bookISBN)
+JOIN course USING (courseId)
+WHERE dept='CSE';
+
+-- 9>List all the book that are not used for any course
+SELECT * 
+FROM text
+WHERE bookISBN NOT IN (
+	SELECT bookISBN	
+	FROM bookadoption);
+
+-- 10>
