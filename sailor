@@ -92,18 +92,21 @@ INSERT INTO rservers VALUES
 (31,104,'2023-11-01');
 
 -- Find the name and age of the oldest sailor. 
-SELECT sname,MAX(age)
+SELECT sname,age
 FROM sailors 
-GROUP BY sid
-ORDER BY age DESC
-LIMIT 1;
+WHERE age =(
+	SELECT MAX(age)
+    FROM sailors);
+
 
 -- For each boat which was reserved by at least 5 sailors with age >= 40, find the boat id and the average age of such sailors.
 select b.bid, avg(s.age) as average_age
-from sailors s, boat b, rservers r
-where r.sid=s.sid and r.bid=b.bid and s.age>=40
-group by bid
-having 2<=count(distinct r.sid);
+from boat AS b 
+JOIN rservers AS r USING (bid)
+JOIN sailors AS s USING (sid)
+WHERE age>=40
+GROUP BY bid
+HAVING COUNT(bid)>=2;
 
 -- Create a view that shows the names and colours of all the boats that have been reserved by a sailor with a specific rating.
 create view specific_rating as
