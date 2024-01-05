@@ -53,7 +53,7 @@ SELECT * FROM boat;
 
 SELECT * FROM rservers;
 
--- Find the colours of boats reserved by Albert
+-- 1.Find the colours of boats reserved by Albert
 SELECT color
 FROM boat
 WHERE bid IN(
@@ -64,7 +64,7 @@ WHERE bid IN(
     FROM sailors
     WHERE sname LIKE 'Albert'));
     
--- Find all sailor id’s of sailors who have a rating of at least 8 or reserved boat 103
+-- 2.Find all sailor id’s of sailors who have a rating of at least 8 or reserved boat 103
 SELECT sid
 FROM sailors 
 WHERE rating>=8 OR sid IN(
@@ -72,7 +72,7 @@ WHERE rating>=8 OR sid IN(
      FROM rservers
      WHERE bid=103);
      
--- Find the names of sailors who have not reserved a boat whose name contains the string “storm”. Order the names in ascending order.
+-- 3.Find the names of sailors who have not reserved a boat whose name contains the string “storm”. Order the names in ascending order.
 SELECT sname 
 FROM sailors 
 WHERE sid NOT IN (
@@ -81,7 +81,7 @@ WHERE sid NOT IN (
 		SELECT bid 
         FROM boat where bname LIKE '%storm%'));
     
--- Find the names of sailors who have reserved all boats. 
+-- 4.Find the names of sailors who have reserved all boats. 
 select sname from sailors s where not exists
 	(select * from boat b where not exists
 		(select * from rservers r where r.sid=s.sid and b.bid=r.bid));
@@ -91,7 +91,7 @@ INSERT INTO rservers VALUES
 (31,102,'2023-10-01'),
 (31,104,'2023-11-01');
 
--- Find the name and age of the oldest sailor. 
+-- 5.Find the name and age of the oldest sailor. 
 SELECT sname,age
 FROM sailors 
 WHERE age =(
@@ -99,7 +99,7 @@ WHERE age =(
     FROM sailors);
 
 
--- For each boat which was reserved by at least 5 sailors with age >= 40, find the boat id and the average age of such sailors.
+-- 6.For each boat which was reserved by at least 5 sailors with age >= 40, find the boat id and the average age of such sailors.
 select b.bid, avg(s.age) as average_age
 from boat AS b 
 JOIN rservers AS r USING (bid)
@@ -108,7 +108,7 @@ WHERE age>=40
 GROUP BY bid
 HAVING COUNT(bid)>=2;
 
--- Create a view that shows the names and colours of all the boats that have been reserved by a sailor with a specific rating.
+-- 7.Create a view that shows the names and colours of all the boats that have been reserved by a sailor with a specific rating.
 create view specific_rating as
 SELECT DISTINCT bname, color
 FROM rservers
@@ -118,7 +118,7 @@ WHERE rating=10;
 
 select * from specific_rating;
 
--- Trigger that prevents boats from being deleted if they have active reservation
+-- 8.Trigger that prevents boats from being deleted if they have active reservation
 
 DELIMITER //
 create trigger CheckAndDelete
