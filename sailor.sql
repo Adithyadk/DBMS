@@ -64,6 +64,7 @@ WHERE bid IN(
     FROM sailors
     WHERE sname LIKE 'Albert'));
     
+    
 -- 2.Find all sailor id’s of sailors who have a rating of at least 8 or reserved boat 103
 SELECT sid
 FROM sailors 
@@ -79,7 +80,7 @@ WHERE sid NOT IN (
 	SELECT sid FROM rservers 
     WHERE bid IN(
 		SELECT bid 
-        FROM boat where bname LIKE '%storm%'));
+        FROM boat where bname LIKE '%storm%'))ORDER BY sname ASC;
     
 -- 4.Find the names of sailors who have reserved all boats. 
 select sname from sailors s where not exists
