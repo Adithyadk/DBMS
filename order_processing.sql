@@ -121,8 +121,10 @@ WHERE unitprice IN (SELECT MAX(unitprice) FROM items);
 -- 6.A trigger that updates order_amout based on quantity and unitprice of order_item
 
 create trigger total_amt
-after insert on orderitems
-for each row update orders set order_amt=(select unitprice from items where item_id=NEW.item_id)*NEW.qty where order_id=NEW.order_id;
+after insert 
+on orderitems
+for each row 
+update orders set order_amt=(select unitprice from items where item_id=NEW.item_id)*NEW.qty where order_id=NEW.order_id;
 
 -- check trigger
 
