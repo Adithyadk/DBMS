@@ -10,10 +10,10 @@ address VARCHAR(25)
 CREATE TABLE car (
 reg_no VARCHAR(25) PRIMARY KEY,
 model VARCHAR(25),
-c_year VARCHAR(25)
+c_year YEAR
 );
 
-CREATE TABLE IF NOT EXISTS accident (
+CREATE TABLE accident (
 report_no INT PRIMARY KEY,
 acc_date DATE,
 loc VARCHAR(25)
@@ -74,10 +74,11 @@ INSERT INTO participated VALUES
 
 -- 1.Find the total number of people who owned cars that were involved in accidents in 2021. 
 
-select COUNT(driver_id) from participated 
+select COUNT(DISTINCT driver_id) 
+from participated 
+join owns using(driver_id)
 join accident using(report_no) 
 where acc_date LIKE "2021%";
-
 
 -- 2.Find the number of accidents in which the cars belonging to “Smith” were involved. 
 
@@ -87,6 +88,12 @@ WHERE driver_id IN (
 	SELECT driver_id FROM 
     person WHERE driver_name LIKE "%smith%");
 
+-- OR --
+
+SELECT COUNT(*)
+FROM participated 
+JOIN person USING (driver_id)
+WHERE driver_name LIKE "%smith%";
 
 -- 3.Add a new accident to the database; assume any values for required attributes. 
 insert into accident values
@@ -98,15 +105,15 @@ insert into participated values
 
 -- 4.Delete the Mazda belonging to “Smith”.
 
-DELETE FROM owns
-WHERE driver_id =(SELECT driver_id FROM person WHERE driver_name LIKE "smith") AND reg_no =(SELECT reg_no FROM car WHERE model LIKE 'Mazda');
+DELETE FROM car
+WHERE model LIKE 'Mazda' AND 
+reg_no IN(SELECT reg_no FROM owns JOIN person USING (driver_id) WHERE driver_name LIKE "smith");
 
 -- 5.Update the damage amount for the car with license number “KA09MA1234” in the accident with report number 65738.
  
 UPDATE participated 
 SET damage_amount=750000 
-WHERE reg_no="KA-09-MA-1234"
-AND report_no=65738;
+WHERE reg_no="KA-09-MA-1234" AND report_no=65738;
  
 -- 6.A view that shows models and year of cars that are involved in accident. 
 
@@ -116,22 +123,32 @@ where reg_no in (select reg_no from participated);
 
 select * from Accident_Cars;
 
+-- OR --
+-- create view Accident_Cars as
+-- select model,c_year from car
+-- join participated using (reg_no) 
+-- join accident using (report_no);
+
 -- 7.A trigger that prevents a driver from participating in more than 2 accidents in a given year.
 
 delimiter //
 create trigger Prevent_Accident
-before insert on participated
+before insert 
+on participated
 for each row 
 begin
-if ( (select count(driver_id) from participated join accident using(report_no) 
-		where driver_id=NEW.driver_id and year(acc_date) in 
+if ( (select count(driver_id) 
+      from participated 
+      join accident using(report_no) 
+	  where driver_id=NEW.driver_id and year(acc_date) in 
 			(select year(acc_date) from accident 
-				where report_no=NEW.report_no) ) =2) then
+			 where report_no=NEW.report_no) ) =2) then
 	SIGNAL SQLSTATE '45000' 
 	SET MESSAGE_TEXT='Driver in 2 accidents';
 end if;
 end;//
 delimiter ;
+
 
 -- checking trigger
 INSERT INTO participated VALUES
