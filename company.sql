@@ -1,7 +1,6 @@
 create database company;
 use company;
 
-
 create table employee(
 	ssn varchar(35) primary key,
 	ename varchar(35),
@@ -89,12 +88,12 @@ FOREIGN KEY(d_no) REFERENCES department(d_no) ON DELETE SET NULL;
 -- 1. Make a list of all project numbers for projects that involve an employee whose last name is ‘Scott’//(In this case Krishna),
 --    either as a worker or as a manager of the department that controls the project. 
 
-
 SELECT p_no,p_name 
 FROM project 
-WHERE d_no IN (
-	SELECT d_no
-    FROM employee 
+WHERE p_no IN (
+	SELECT p_no
+    FROM workson
+    JOIN employee USING(ssn)
     WHERE ename LIKE '%Krishna') OR d_no IN (SELECT d_no from department WHERE mgr_ssn IN(SELECT ssn from employee WHERE ename LIKE '%krishna'));
     
 -- 2. Show the resulting salaries if every employee working on the ‘IoT’ project is given a 10 percent raise. 
